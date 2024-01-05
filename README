@@ -1,0 +1,22 @@
+
+	In this project, I created a multithreading library. It is able to make up to 128 threads and schedule them preemptively ever 50 milliseconds until all of the threads finish.
+	
+	What I did to accomplish this is I first made my thread struct. Within this struct help the attributes of each thread like the id, registers, stack and status of the thread. After doing that, I made a thread_table that would hold all the information for all the threads created.
+	
+	What I then did was create my pthread_create function. Within this function I instantiated the main thread, and the setup all the threads initializing them to empty in my setup() function. Also in my setup funcion I created made the ualarm that would trigger my round robin scheduling. I then return to the pthread_create function and create the first thread, making sure the stack has the correct allocated memory and that the registers had the correct values/functions associated with them. After doing this, I set the thread to "ready".
+
+	With the round robin scheduling setup, it would run schedule() every time it went off, and that function would find the next "ready" thread, setjmp the old thread if it did not exit to save the context of the thread, and then longjmp to the new thread.
+
+	When the thread was done, it would call pthread_exit which would set the thread to "exited" and then check to see if it was the final thread. If it was the final thread then it would exit but if not then it would call schedule to schedule the next "ready" thread.
+
+	Some issues I ran into was setting up the registers and stack. When I originally read the project description, I thought I was going to have to divide the stack size by 8 to accomodate for the fact that the stack pointer was an unsigned long int. When I tried doing that however it was giving me a bunch of seg faults because of the alignment of the memory. I then switched my stack pointer to void and then no longer divided the stack size by 8.
+
+	Additionally, before looking at the documentation of jmpbuf, I was unsure how to index into the stack to setup the arg, start routine and start thunk. 
+	
+	I also had a hard time making sure to not schedule an exited process, so properly exiting the thread in pthread_create and then checking in my scheduler to see if it has exited fixed this.
+
+	Making sure to keep a running count of the amount of threads left also fixed my issue of not knowing when to exit the whole program.
+
+	Overall, making sure all the threads had the correct status, allocated stack, then freed stack, and then knowing when to and when not to schedule gave me segmentation faults.  
+
+	At the end, I also had a while loop at the bottom of my main.c file that I implemented to error check in office hours, and forgot to take out so even when I was passing the test cases, I thought my code was not working because it would not return and exit from the program when I was testing with my main.c	
